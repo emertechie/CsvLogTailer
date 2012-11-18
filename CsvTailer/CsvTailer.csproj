@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CsvTailer</RootNamespace>
     <AssemblyName>CsvTailer</AssemblyName>
@@ -35,6 +35,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CsvParser">
@@ -81,7 +84,6 @@
     <Compile Include="Bookmarks\LogFileBookmark.cs" />
     <Compile Include="LogRecord.cs" />
     <Compile Include="Mono.Options\Options.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
