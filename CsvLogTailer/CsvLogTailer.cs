@@ -184,19 +184,19 @@ namespace CsvLogTailer
 				// I don't really trust the FileSystemWatcher, so using a task to repeatedly check if we've got all the files
 				var cts = new CancellationTokenSource();
 				Task.Factory.StartNew(() =>
-				{
-					do
 					{
-						foreach (string file in Directory.EnumerateFiles(directoryPath, filter))
+						do
 						{
-							if (trackedPaths.TryAdd(file, true))
-								observer.OnNext(new FileTailingChange(file, FileTailingChangeType.StartTailing));
-						}
+							foreach (string file in Directory.EnumerateFiles(directoryPath, filter))
+							{
+								if (trackedPaths.TryAdd(file, true))
+									observer.OnNext(new FileTailingChange(file, FileTailingChangeType.StartTailing));
+							}
 
-						cts.Token.WaitHandle.WaitOne(LogDirectoryPollTimeSpan);
-					}
-					while (!cts.IsCancellationRequested);
-				},
+							cts.Token.WaitHandle.WaitOne(LogDirectoryPollTimeSpan);
+						}
+						while (!cts.IsCancellationRequested);
+					},
 					cts.Token)
 					.ContinueWith(
 						t => observer.OnError(t.Exception),
