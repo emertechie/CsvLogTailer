@@ -7,6 +7,10 @@ using Mono.Options;
 
 namespace Echo
 {
+	/// <summary>
+	/// This is a little test program that will echo tailed logs to console and optionally to 
+	/// file also (means you can do a quick file diff to make sure you are picking up all logs)
+	/// </summary>
 	class Program
 	{
 		static void Main(string[] args)
