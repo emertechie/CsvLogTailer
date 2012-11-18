@@ -83,7 +83,6 @@
     <Compile Include="Bookmarks\ILogFileBookmarkRepository.cs" />
     <Compile Include="Bookmarks\LogFileBookmark.cs" />
     <Compile Include="LogRecord.cs" />
-    <Compile Include="Mono.Options\Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
