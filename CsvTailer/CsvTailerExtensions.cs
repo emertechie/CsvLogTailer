@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tailer
+namespace CsvTailer
 {
 	public static class CsvTailerExtensions
 	{

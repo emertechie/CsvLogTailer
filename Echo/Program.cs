@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CsvTailer;
 using Mono.Options;
-using Tailer;
 
 namespace Echo
 {
@@ -28,7 +28,7 @@ namespace Echo
 
 			Console.WriteLine("Press return to finish");
 
-			var tailer = new CsvTailer();
+			var tailer = new CsvTailer.CsvTailer();
 
 			var exceptions = new List<Exception>();
 			var exSub = tailer.Exceptions.Subscribe(ex =>

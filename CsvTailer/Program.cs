@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mono.Options;
+using CsvTailer.Mono.Options;
 
-namespace Tailer
+namespace CsvTailer
 {
 	class Program
 	{

@@ -10,7 +10,8 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Tailer.Bookmarks;
+using CsvTailer;
+using CsvTailer.Bookmarks;
 using Xunit;
 using Xunit.Extensions;
 
@@ -125,14 +126,14 @@ namespace Tailer.Tests
 
 		public class Given_empty_file : FileTailerTestsBase
 		{
-			private readonly CsvTailer sut;
+			private readonly CsvTailer.CsvTailer sut;
 			private bool ignoreExceptions;
 
 			public Given_empty_file()
 			{
 				LogFilePath = Path.GetTempFileName();
 
-				sut = new CsvTailer();
+				sut = new CsvTailer.CsvTailer();
 				sut.Exceptions.Subscribe(ex =>
 				{
 					if (!ignoreExceptions)
@@ -392,11 +393,11 @@ namespace Tailer.Tests
 
 		public class Given_no_file_exists : FileTailerTestsBase
 		{
-			private readonly CsvTailer sut;
+			private readonly CsvTailer.CsvTailer sut;
 
 			public Given_no_file_exists()
 			{
-				sut = new CsvTailer();
+				sut = new CsvTailer.CsvTailer();
 				sut.Exceptions.Subscribe(ex => Console.WriteLine(ex));
 			}
 
@@ -449,7 +450,7 @@ namespace Tailer.Tests
 			[Fact]
 			public void CanTailAllFilesInDirectory_WithNoFilter()
 			{
-				var sut = new CsvTailer();
+				var sut = new CsvTailer.CsvTailer();
 				TailerSubscription = sut.Tail(logsDirectory, file => LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
@@ -493,7 +494,7 @@ namespace Tailer.Tests
 			{
 				const string directoryFilter = "*2.txt";
 
-				var sut = new CsvTailer();
+				var sut = new CsvTailer.CsvTailer();
 				TailerSubscription = sut.Tail(logsDirectory, directoryFilter, file => LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
@@ -531,7 +532,7 @@ namespace Tailer.Tests
 				var logFile2Columns = new[] { "B" };
 				Func<string, string[]> columnsProvider = file => (Path.GetFileName(file) == "logfile1.txt") ? logFile1Columns : logFile2Columns;
 
-				var sut = new CsvTailer();
+				var sut = new CsvTailer.CsvTailer();
 				TailerSubscription = sut.Tail(logsDirectory, columnsProvider).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");

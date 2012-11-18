@@ -130,7 +130,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -148,7 +147,7 @@ using NDesk.Options;
 #if NDESK_OPTIONS
 namespace NDesk.Options
 #else
-namespace Mono.Options
+namespace CsvTailer.Mono.Options
 #endif
 {
 	static class StringCoda {

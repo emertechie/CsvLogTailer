@@ -10,10 +10,10 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CsvTailer.Bookmarks;
 using FParsec;
-using Tailer.Bookmarks;
 
-namespace Tailer
+namespace CsvTailer
 {
 	public class CsvTailer
 	{

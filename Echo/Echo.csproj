@@ -63,14 +63,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tailer\Tailer.csproj">
-      <Project>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</Project>
-      <Name>Tailer</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CsvTailer\CsvTailer.csproj">
+      <Project>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</Project>
+      <Name>CsvTailer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

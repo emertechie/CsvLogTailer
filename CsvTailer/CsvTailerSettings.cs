@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Tailer
+namespace CsvTailer
 {
 	public class CsvTailerSettings
 	{
