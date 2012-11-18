@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CsvTailer.Bookmarks
+namespace CsvLogTailer.Bookmarks
 {
 	public class LogFileBookmark
 	{

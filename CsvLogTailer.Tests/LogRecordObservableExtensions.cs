@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Reactive;
 using System.Reactive.Linq;
+using CsvLogTailer;
 
 namespace CsvTailer.Tests
 {

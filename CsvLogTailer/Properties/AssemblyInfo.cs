@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CsvTailer.Tests")]
+[assembly: AssemblyTitle("CsvLogTailer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("CsvTailer.Tests")]
+[assembly: AssemblyProduct("CsvLogTailer")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ea8fb24b-66db-4bfb-be04-6568f3f37b3e")]
+[assembly: Guid("de81d254-4f80-4b6e-940c-935a220d29d3")]
 
 // Version information for an assembly consists of the following four values:
 //

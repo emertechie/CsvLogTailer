@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using CsvTailer.Bookmarks;
+using CsvLogTailer.Bookmarks;
 using Xunit;
 
 namespace CsvTailer.Tests.Bookmarks

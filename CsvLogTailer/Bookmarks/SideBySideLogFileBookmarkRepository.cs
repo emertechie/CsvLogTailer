@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace CsvTailer.Bookmarks
+namespace CsvLogTailer.Bookmarks
 {
 	public class SideBySideLogFileBookmarkRepository : ILogFileBookmarkRepository
 	{

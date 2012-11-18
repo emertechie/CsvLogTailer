@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Text;
 
-namespace CsvTailer
+namespace CsvLogTailer
 {
-	public class CsvTailerSettings
+	public class CsvLogTailerSettings
 	{
-		public CsvTailerSettings()
+		public CsvLogTailerSettings()
 		{
 			Encoding = Encoding.UTF8;
 			BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(1);
 		}
 
 		public string FileOrDirectoryPath { get; set; }
-
-		public Encoding Encoding { get; set; }
 
 		public string DirectoryFilter { get; set; }
 
@@ -22,5 +20,7 @@ namespace CsvTailer
 		public int DateTimeColumnIndex { get; set; }
 
 		public TimeSpan BookmarkRepositoryUpdateFrequency { get; set; }
+
+		public Encoding Encoding { get; set; }
 	}
 }

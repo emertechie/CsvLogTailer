@@ -1,4 +1,4 @@
-﻿namespace CsvTailer.Bookmarks
+﻿namespace CsvLogTailer.Bookmarks
 {
 	public interface ILogFileBookmarkRepository
 	{

@@ -13,9 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{FE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo", "Echo\Echo.csproj", "{CC990320-7331-4586-81D9-857C0F05DC94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvTailer", "CsvTailer\CsvTailer.csproj", "{911D324C-8AD8-43DE-BC32-A8E936AE8031}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvLogTailer", "CsvLogTailer\CsvLogTailer.csproj", "{911D324C-8AD8-43DE-BC32-A8E936AE8031}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvTailer.Tests", "CsvTailer.Tests\CsvTailer.Tests.csproj", "{BA7B1822-354E-4C82-BE9E-AD22CFF5C6D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvLogTailer.Tests", "CsvLogTailer.Tests\CsvLogTailer.Tests.csproj", "{BA7B1822-354E-4C82-BE9E-AD22CFF5C6D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

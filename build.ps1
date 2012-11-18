@@ -11,7 +11,7 @@ Task default -Depends Compile, RunTests, CreatePackage
 
 Task Compile -Depends Clean {
 	Write-Host "Building solution" -ForegroundColor Green
-	Exec { msbuild "$solutionDir\CsvTailer\CsvTailer.csproj" /t:Build /p:Configuration=Release /v:quiet /p:OutDir=$projectOutputDir } 
+	Exec { msbuild "$solutionDir\CsvLogTailer\CsvLogTailer.csproj" /t:Build /p:Configuration=Release /v:quiet /p:OutDir=$projectOutputDir } 
 	gci "$projectOutputDir\CsvParser*.*" | rm
 	gci "$projectOutputDir\System.Reactive*.*" | rm
 	gci "$projectOutputDir\FParsec*.*" | rm
@@ -27,7 +27,7 @@ Task Clean {
 	mkdir $buildArtifactsDir | out-null
 	
 	Write-Host "Cleaning solution" -ForegroundColor Green
-	Exec { msbuild "$solutionDir\CsvTailer.sln" /t:Clean /p:Configuration=Release /v:quiet } 
+	Exec { msbuild "$solutionDir\CsvLogTailer.sln" /t:Clean /p:Configuration=Release /v:quiet } 
 }
 
 Task RunTests {
@@ -36,5 +36,5 @@ Task RunTests {
 
 Task CreatePackage {
 	Write-Host "Building NuGet package" -ForegroundColor Green
-	&"$solutionDir\.nuget\nuget.exe" pack "$solutionDir\CsvTailer.nuspec" -OutputDirectory "$buildArtifactsDir" -Version $version
+	&"$solutionDir\.nuget\nuget.exe" pack "$solutionDir\CsvLogTailer.nuspec" -OutputDirectory "$buildArtifactsDir" -Version $version
 }

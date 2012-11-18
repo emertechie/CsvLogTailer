@@ -10,7 +10,8 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvTailer.Bookmarks;
+using CsvLogTailer;
+using CsvLogTailer.Bookmarks;
 using Xunit;
 using Xunit.Extensions;
 
@@ -125,14 +126,14 @@ namespace CsvTailer.Tests
 
 		public class Given_empty_file : FileTailerTestsBase
 		{
-			private readonly CsvTailer sut;
+			private readonly CsvLogTailer.CsvLogTailer sut;
 			private bool ignoreExceptions;
 
 			public Given_empty_file()
 			{
 				LogFilePath = Path.GetTempFileName();
 
-				sut = new CsvTailer();
+				sut = new CsvLogTailer.CsvLogTailer();
 				sut.Exceptions.Subscribe(ex =>
 				{
 					if (!ignoreExceptions)
@@ -288,7 +289,7 @@ namespace CsvTailer.Tests
 			[Fact]
 			public void CanStoreLastPositionMetadataForEachLog()
 			{
-				var settings = new CsvTailerSettings { FileOrDirectoryPath = LogFilePath };
+				var settings = new CsvLogTailerSettings { FileOrDirectoryPath = LogFilePath };
 				var positionRepository = new FakeLogFileBookmarkRepository();
 
 				TailerSubscription = sut.Tail(settings, positionRepository).MaintainObservedEventsCollection(ObservedEvents);
@@ -311,7 +312,7 @@ namespace CsvTailer.Tests
 			[Fact]
 			public void CanStartTailingFileFromLastPosition()
 			{
-				var settings = new CsvTailerSettings
+				var settings = new CsvLogTailerSettings
 				{
 					FileOrDirectoryPath = LogFilePath,
 					BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(0.1)
@@ -396,11 +397,11 @@ namespace CsvTailer.Tests
 
 		public class Given_no_file_exists : FileTailerTestsBase
 		{
-			private readonly CsvTailer sut;
+			private readonly CsvLogTailer.CsvLogTailer sut;
 
 			public Given_no_file_exists()
 			{
-				sut = new CsvTailer();
+				sut = new CsvLogTailer.CsvLogTailer();
 				sut.Exceptions.Subscribe(ex => Console.WriteLine(ex));
 			}
 
@@ -453,7 +454,7 @@ namespace CsvTailer.Tests
 			[Fact]
 			public void CanTailAllFilesInDirectory_WithNoFilter()
 			{
-				var sut = new CsvTailer();
+				var sut = new CsvLogTailer.CsvLogTailer();
 				TailerSubscription = sut.Tail(logsDirectory, LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
@@ -497,7 +498,7 @@ namespace CsvTailer.Tests
 			{
 				const string directoryFilter = "*2.txt";
 
-				var sut = new CsvTailer();
+				var sut = new CsvLogTailer.CsvLogTailer();
 				TailerSubscription = sut.Tail(logsDirectory, directoryFilter, LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
@@ -535,8 +536,8 @@ namespace CsvTailer.Tests
 				var logFile2Columns = new[] { "B" };
 				Func<string, string[]> columnsProvider = file => (Path.GetFileName(file) == "logfile1.txt") ? logFile1Columns : logFile2Columns;
 
-				var sut = new CsvTailer();
-				var settings = new CsvTailerSettings
+				var sut = new CsvLogTailer.CsvLogTailer();
+				var settings = new CsvLogTailerSettings
 					{
 						FileOrDirectoryPath = logsDirectory,
 						ColumnNamesProvider = columnsProvider

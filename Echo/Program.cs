@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CsvTailer;
+using CsvLogTailer;
 using Mono.Options;
 
 namespace Echo
@@ -28,7 +28,7 @@ namespace Echo
 
 			Console.WriteLine("Press return to finish");
 
-			var tailer = new CsvTailer.CsvTailer();
+			var tailer = new CsvLogTailer.CsvLogTailer();
 
 			var exceptions = new List<Exception>();
 			var exSub = tailer.Exceptions.Subscribe(ex =>
@@ -38,7 +38,7 @@ namespace Echo
 				});
 
 			tailer
-				.Tail(new CsvTailerSettings
+				.Tail(new CsvLogTailerSettings
 					{
 						FileOrDirectoryPath = logFileOrDirPath,
 						DirectoryFilter = directoryFilter,

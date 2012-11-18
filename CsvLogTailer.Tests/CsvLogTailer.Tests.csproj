@@ -8,8 +8,8 @@
     <ProjectGuid>{BA7B1822-354E-4C82-BE9E-AD22CFF5C6D3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CsvTailer.Tests</RootNamespace>
-    <AssemblyName>CsvTailer.Tests</AssemblyName>
+    <RootNamespace>CsvLogTailer.Tests</RootNamespace>
+    <AssemblyName>CsvLogTailer.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -73,9 +73,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CsvTailer\CsvTailer.csproj">
+    <ProjectReference Include="..\CsvLogTailer\CsvLogTailer.csproj">
       <Project>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</Project>
-      <Name>CsvTailer</Name>
+      <Name>CsvLogTailer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

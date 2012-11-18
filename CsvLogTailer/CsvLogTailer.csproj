@@ -8,8 +8,8 @@
     <ProjectGuid>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CsvTailer</RootNamespace>
-    <AssemblyName>CsvTailer</AssemblyName>
+    <RootNamespace>CsvLogTailer</RootNamespace>
+    <AssemblyName>CsvLogTailer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -76,9 +76,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bookmarks\SideBySideLogFileBookmarkRepository.cs" />
-    <Compile Include="CsvTailer.cs" />
-    <Compile Include="CsvTailerExtensions.cs" />
-    <Compile Include="CsvTailerSettings.cs" />
+    <Compile Include="CsvLogTailer.cs" />
+    <Compile Include="CsvLogTailerExtensions.cs" />
+    <Compile Include="CsvLogTailerSettings.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Bookmarks\ILogFileBookmarkRepository.cs" />
     <Compile Include="Bookmarks\LogFileBookmark.cs" />

@@ -10,12 +10,12 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvTailer.Bookmarks;
+using CsvLogTailer.Bookmarks;
 using FParsec;
 
-namespace CsvTailer
+namespace CsvLogTailer
 {
-	public class CsvTailer
+	public class CsvLogTailer
 	{
 		private readonly TimeSpan LogDirectoryPollTimeSpan = TimeSpan.FromSeconds(30);
 		private readonly TimeSpan FilePollTimeSpan = TimeSpan.FromSeconds(0.5);
@@ -27,12 +27,12 @@ namespace CsvTailer
 			get { return ExceptionsSubject; }
 		}
 
-		public IObservable<LogRecord> Tail(CsvTailerSettings settings)
+		public IObservable<LogRecord> Tail(CsvLogTailerSettings settings)
 		{
 			return Tail(settings, new NullLogFileBookmarkRepository());
 		}
 
-		public IObservable<LogRecord> Tail(CsvTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)
+		public IObservable<LogRecord> Tail(CsvLogTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)
 		{
 			if (settings == null) throw new ArgumentNullException("settings");
 			if (logFileBookmarkRepository == null) throw new ArgumentNullException("logFileBookmarkRepository");
@@ -117,12 +117,12 @@ namespace CsvTailer
 			});
 		}
 
-		private static string[] GetColumnsForFile(string filePath, CsvTailerSettings settings)
+		private static string[] GetColumnsForFile(string filePath, CsvLogTailerSettings settings)
 		{
 			return settings.ColumnNamesProvider != null ? settings.ColumnNamesProvider(filePath) : null;
 		}
 
-		private IObservable<LogRecord> GetAllFileChangesForDirectory(CsvTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)
+		private IObservable<LogRecord> GetAllFileChangesForDirectory(CsvLogTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)
 		{
 			return Observable.Create<LogRecord>(observer =>
 			{

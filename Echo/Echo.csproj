@@ -67,9 +67,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CsvTailer\CsvTailer.csproj">
+    <ProjectReference Include="..\CsvLogTailer\CsvLogTailer.csproj">
       <Project>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</Project>
-      <Name>CsvTailer</Name>
+      <Name>CsvLogTailer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

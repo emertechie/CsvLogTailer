@@ -3,7 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace CsvTailer
+namespace CsvLogTailer
 {
 	public static class Extensions
 	{
