@@ -3,7 +3,7 @@ using System.IO;
 using CsvTailer.Bookmarks;
 using Xunit;
 
-namespace Tailer.Tests.Bookmarks
+namespace CsvTailer.Tests.Bookmarks
 {
 	public class SideBySideLogFileBookmarkRepositoryTests
 	{
