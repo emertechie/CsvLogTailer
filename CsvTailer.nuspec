@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-16"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>CsvTailer</id>
+		<version>0.0.0</version>
+		<title>CsvTailer</title>
+		<authors>Andrew Smith</authors>
+		<owners>Andrew Smith</owners>
+		<projectUrl>https://bitbucket.org/emertechie/csvtailer</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Utility to tail a CSV file, or a folder containing CSV files. Exposes results as an IObservable. Supports detecting new files, and only tailing from previous position.</description>
+		<copyright>Copyright 2012</copyright>
+		<dependencies>
+			<dependency id="CsvParser" version="0.5" />
+			<dependency id="Rx-Core" version="2.0" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="_build\bin\*.dll" target="lib" />
+		<file src="_build\bin\*.pdb" target="lib" />
+		<file src="_build\bin\*.xml" target="lib" />
+	</files>
+</package>
