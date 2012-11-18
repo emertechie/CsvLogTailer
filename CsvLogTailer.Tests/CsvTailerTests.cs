@@ -10,12 +10,11 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvLogTailer;
 using CsvLogTailer.Bookmarks;
 using Xunit;
 using Xunit.Extensions;
 
-namespace CsvTailer.Tests
+namespace CsvLogTailer.Tests
 {
 	public class CsvTailerTests
 	{
@@ -126,14 +125,14 @@ namespace CsvTailer.Tests
 
 		public class Given_empty_file : FileTailerTestsBase
 		{
-			private readonly CsvLogTailer.CsvLogTailer sut;
+			private readonly CsvLogTailer sut;
 			private bool ignoreExceptions;
 
 			public Given_empty_file()
 			{
 				LogFilePath = Path.GetTempFileName();
 
-				sut = new CsvLogTailer.CsvLogTailer();
+				sut = new CsvLogTailer();
 				sut.Exceptions.Subscribe(ex =>
 				{
 					if (!ignoreExceptions)
@@ -397,11 +396,11 @@ namespace CsvTailer.Tests
 
 		public class Given_no_file_exists : FileTailerTestsBase
 		{
-			private readonly CsvLogTailer.CsvLogTailer sut;
+			private readonly CsvLogTailer sut;
 
 			public Given_no_file_exists()
 			{
-				sut = new CsvLogTailer.CsvLogTailer();
+				sut = new CsvLogTailer();
 				sut.Exceptions.Subscribe(ex => Console.WriteLine(ex));
 			}
 
@@ -454,7 +453,7 @@ namespace CsvTailer.Tests
 			[Fact]
 			public void CanTailAllFilesInDirectory_WithNoFilter()
 			{
-				var sut = new CsvLogTailer.CsvLogTailer();
+				var sut = new CsvLogTailer();
 				TailerSubscription = sut.Tail(logsDirectory, LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
@@ -498,7 +497,7 @@ namespace CsvTailer.Tests
 			{
 				const string directoryFilter = "*2.txt";
 
-				var sut = new CsvLogTailer.CsvLogTailer();
+				var sut = new CsvLogTailer();
 				TailerSubscription = sut.Tail(logsDirectory, directoryFilter, LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
@@ -536,7 +535,7 @@ namespace CsvTailer.Tests
 				var logFile2Columns = new[] { "B" };
 				Func<string, string[]> columnsProvider = file => (Path.GetFileName(file) == "logfile1.txt") ? logFile1Columns : logFile2Columns;
 
-				var sut = new CsvLogTailer.CsvLogTailer();
+				var sut = new CsvLogTailer();
 				var settings = new CsvLogTailerSettings
 					{
 						FileOrDirectoryPath = logsDirectory,

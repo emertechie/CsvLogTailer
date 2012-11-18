@@ -2,9 +2,8 @@
 using System.Collections.Concurrent;
 using System.Reactive;
 using System.Reactive.Linq;
-using CsvLogTailer;
 
-namespace CsvTailer.Tests
+namespace CsvLogTailer.Tests
 {
 	public static class LogRecordObservableExtensions
 	{
