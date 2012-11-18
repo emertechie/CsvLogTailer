@@ -38,7 +38,12 @@ namespace Echo
 				});
 
 			tailer
-				.Tail(logFileOrDirPath, directoryFilter, columns)
+				.Tail(new CsvTailerSettings
+					{
+						FileOrDirectoryPath = logFileOrDirPath,
+						DirectoryFilter = directoryFilter,
+						ColumnNamesProvider = file => columns
+					})
 				.Subscribe(log =>
 				{
 					var fileName = Path.GetFileName(log.FilePath);

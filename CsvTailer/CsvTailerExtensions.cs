@@ -1,40 +1,47 @@
 ﻿using System;
+using CsvTailer.Bookmarks;
 
 namespace CsvTailer
 {
 	public static class CsvTailerExtensions
 	{
-		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string fileOrDirectoryPath)
+		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string filePath, ILogFileBookmarkRepository repository = null)
 		{
-			return tailer.Tail(fileOrDirectoryPath, filePath => null);
+			return tailer.Tail(filePath, null, file => null, repository);
 		}
 
-		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string fileOrDirectoryPath, Func<string, string[]> columnsProvider)
+		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string filePath, string[] columnNames, ILogFileBookmarkRepository repository = null)
 		{
-			var settings = new CsvTailerSettings(fileOrDirectoryPath)
-				{
-					ColumnsProvider = columnsProvider
-				};
-			return tailer.Tail(settings);
+			return tailer.Tail(filePath, null, file => columnNames, repository);
 		}
 
-		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string directoryPath, string directoryFilter)
+		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string directoryPath, string directoryFilter, ILogFileBookmarkRepository repository = null)
 		{
-			return tailer.Tail(directoryPath, directoryFilter, filePath => null);
+			return tailer.Tail(directoryPath, directoryFilter, filePath => null, repository);
 		}
 
-		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string directoryPath, string directoryFilter, string[] columns)
+		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string directoryPath, string directoryFilter, string[] columnNames, ILogFileBookmarkRepository repository = null)
 		{
-			return tailer.Tail(directoryPath, directoryFilter, _ => columns);
+			return tailer.Tail(directoryPath, directoryFilter, filePath => columnNames, repository);
 		}
 
-		public static IObservable<LogRecord> Tail(this CsvTailer tailer, string directoryPath, string directoryFilter, Func<string, string[]> columnsProvider)
+		private static IObservable<LogRecord> Tail(
+			this CsvTailer tailer,
+			string directoryPath,
+			string directoryFilter,
+			Func<string, string[]> columnNamesProvider,
+			ILogFileBookmarkRepository repository = null)
 		{
-			var settings = new CsvTailerSettings(directoryPath)
+			var settings = new CsvTailerSettings
 			{
-				DirectoryFilter = directoryFilter
+				FileOrDirectoryPath = directoryPath,
+				DirectoryFilter = directoryFilter,
+				ColumnNamesProvider = columnNamesProvider
 			};
-			return tailer.Tail(settings);
+
+			return repository == null
+				? tailer.Tail(settings)
+				: tailer.Tail(settings, repository);
 		}
 	}
 }

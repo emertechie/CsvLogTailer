@@ -119,7 +119,7 @@ namespace CsvTailer
 
 		private static string[] GetColumnsForFile(string filePath, CsvTailerSettings settings)
 		{
-			return settings.ColumnsProvider != null ? settings.ColumnsProvider(filePath) : null;
+			return settings.ColumnNamesProvider != null ? settings.ColumnNamesProvider(filePath) : null;
 		}
 
 		private IObservable<LogRecord> GetAllFileChangesForDirectory(CsvTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)

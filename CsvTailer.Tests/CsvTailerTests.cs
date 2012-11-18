@@ -172,7 +172,7 @@ namespace Tailer.Tests
 			public void CanObserveLogWithColumns()
 			{
 				var expectedColumns = new[] { "A", "B" };
-				TailerSubscription = sut.Tail(LogFilePath, filePath => expectedColumns).MaintainObservedEventsCollection(ObservedEvents);
+				TailerSubscription = sut.Tail(LogFilePath, expectedColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				Write(CreateLogLine());
 				LogRecord next = GetNext(ObservedEvents);
@@ -289,7 +289,7 @@ namespace Tailer.Tests
 			[Fact]
 			public void CanStoreLastPositionMetadataForEachLog()
 			{
-				var settings = new CsvTailerSettings(LogFilePath);
+				var settings = new CsvTailerSettings { FileOrDirectoryPath = LogFilePath };
 				var positionRepository = new FakeLogFileBookmarkRepository();
 
 				TailerSubscription = sut.Tail(settings, positionRepository).MaintainObservedEventsCollection(ObservedEvents);
@@ -312,7 +312,11 @@ namespace Tailer.Tests
 			[Fact]
 			public void CanStartTailingFileFromLastPosition()
 			{
-				var settings = new CsvTailerSettings(LogFilePath) { BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(0.1) };
+				var settings = new CsvTailerSettings
+				{
+					FileOrDirectoryPath = LogFilePath,
+					BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(0.1)
+				};
 
 				var positionRepository = new FakeLogFileBookmarkRepository();
 
@@ -451,7 +455,7 @@ namespace Tailer.Tests
 			public void CanTailAllFilesInDirectory_WithNoFilter()
 			{
 				var sut = new CsvTailer.CsvTailer();
-				TailerSubscription = sut.Tail(logsDirectory, file => LogColumns).MaintainObservedEventsCollection(ObservedEvents);
+				TailerSubscription = sut.Tail(logsDirectory, LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
 				string file2 = CreateLogFile(logsDirectory, "logfile2.txt");
@@ -495,7 +499,7 @@ namespace Tailer.Tests
 				const string directoryFilter = "*2.txt";
 
 				var sut = new CsvTailer.CsvTailer();
-				TailerSubscription = sut.Tail(logsDirectory, directoryFilter, file => LogColumns).MaintainObservedEventsCollection(ObservedEvents);
+				TailerSubscription = sut.Tail(logsDirectory, directoryFilter, LogColumns).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
 				string file2 = CreateLogFile(logsDirectory, "logfile2.txt");
@@ -533,7 +537,12 @@ namespace Tailer.Tests
 				Func<string, string[]> columnsProvider = file => (Path.GetFileName(file) == "logfile1.txt") ? logFile1Columns : logFile2Columns;
 
 				var sut = new CsvTailer.CsvTailer();
-				TailerSubscription = sut.Tail(logsDirectory, columnsProvider).MaintainObservedEventsCollection(ObservedEvents);
+				var settings = new CsvTailerSettings
+					{
+						FileOrDirectoryPath = logsDirectory,
+						ColumnNamesProvider = columnsProvider
+					};
+				TailerSubscription = sut.Tail(settings).MaintainObservedEventsCollection(ObservedEvents);
 
 				string file1 = CreateLogFile(logsDirectory, "logfile1.txt");
 				string file2 = CreateLogFile(logsDirectory, "logfile2.txt");

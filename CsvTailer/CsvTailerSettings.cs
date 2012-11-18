@@ -5,26 +5,19 @@ namespace CsvTailer
 {
 	public class CsvTailerSettings
 	{
-		private readonly string fileOrDirectoryPath;
-
-		public CsvTailerSettings(string fileOrDirectoryPath)
+		public CsvTailerSettings()
 		{
-			this.fileOrDirectoryPath = fileOrDirectoryPath;
 			Encoding = Encoding.UTF8;
-
 			BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(1);
 		}
 
-		public string FileOrDirectoryPath
-		{
-			get { return fileOrDirectoryPath; }
-		}
+		public string FileOrDirectoryPath { get; set; }
 
 		public Encoding Encoding { get; set; }
 
 		public string DirectoryFilter { get; set; }
 
-		public Func<string, string[]> ColumnsProvider { get; set; }
+		public Func<string, string[]> ColumnNamesProvider { get; set; }
 
 		public int DateTimeColumnIndex { get; set; }
 
