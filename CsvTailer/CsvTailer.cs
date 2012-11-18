@@ -325,7 +325,7 @@ namespace CsvTailer
 							.Where(fields => !String.IsNullOrWhiteSpace(fields[dateTimeColumnIndex]))
 							.Select(fields =>
 							{
-								return new LogRecord(filePath, stream.Position, DateTime.Parse(fields[dateTimeColumnIndex]), fields, possiblyNullColumnNames);
+								return new LogRecord(filePath, DateTime.Parse(fields[dateTimeColumnIndex]), fields, possiblyNullColumnNames);
 							});
 					}
 					catch (Exception exception)
