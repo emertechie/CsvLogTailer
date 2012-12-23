@@ -80,25 +80,25 @@ namespace CsvLogTailing
 				var cancellationTokenSource = new CancellationTokenSource();
 
 				Task fileWatcherTask = Task.Factory.StartNew(() =>
-				{
-					do
 					{
-						try
+						do
 						{
-							TailFile(filePath, encoding, possiblyNullColumnNames, dateTimeColumnIndex, observer, cancellationTokenSource, lastKnownPosition);
+							try
+							{
+								TailFile(filePath, encoding, possiblyNullColumnNames, dateTimeColumnIndex, observer, cancellationTokenSource, lastKnownPosition);
+							}
+							catch (FileNotFoundException)
+							{
+								WaitUntilFileCreated(filePath, cancellationTokenSource);
+							}
+							catch (Exception ex)
+							{
+								observer.OnError(ex);
+								throw;
+							}
 						}
-						catch (FileNotFoundException)
-						{
-							WaitUntilFileCreated(filePath, cancellationTokenSource);
-						}
-						catch (Exception ex)
-						{
-							observer.OnError(ex);
-							throw;
-						}
-					}
-					while (!cancellationTokenSource.IsCancellationRequested);
-				},
+						while (!cancellationTokenSource.IsCancellationRequested);
+					},
 					TaskCreationOptions.LongRunning);
 
 				// Make sure any Task exception is observed
