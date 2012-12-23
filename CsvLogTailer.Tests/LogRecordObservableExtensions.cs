@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace CsvLogTailer.Tests
+namespace CsvLogTailing.Tests
 {
 	public static class LogRecordObservableExtensions
 	{

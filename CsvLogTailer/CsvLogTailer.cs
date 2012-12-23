@@ -10,10 +10,10 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvLogTailer.Bookmarks;
+using CsvLogTailing.Bookmarks;
 using FParsec;
 
-namespace CsvLogTailer
+namespace CsvLogTailing
 {
 	public class CsvLogTailer
 	{

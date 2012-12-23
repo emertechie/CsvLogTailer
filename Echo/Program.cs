@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CsvLogTailer;
+using CsvLogTailing;
 using Mono.Options;
 
 namespace Echo
@@ -32,7 +32,7 @@ namespace Echo
 
 			Console.WriteLine("Press return to finish");
 
-			var tailer = new CsvLogTailer.CsvLogTailer();
+			var tailer = new CsvLogTailer();
 
 			var exceptions = new List<Exception>();
 			var exSub = tailer.Exceptions.Subscribe(ex =>

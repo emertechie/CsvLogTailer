@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using CsvLogTailer.Bookmarks;
+using CsvLogTailing.Bookmarks;
 using Xunit;
 
-namespace CsvLogTailer.Tests.Bookmarks
+namespace CsvLogTailing.Tests.Bookmarks
 {
 	public class SideBySideLogFileBookmarkRepositoryTests
 	{

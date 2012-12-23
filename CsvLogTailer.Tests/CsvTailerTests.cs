@@ -10,11 +10,11 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvLogTailer.Bookmarks;
+using CsvLogTailing.Bookmarks;
 using Xunit;
 using Xunit.Extensions;
 
-namespace CsvLogTailer.Tests
+namespace CsvLogTailing.Tests
 {
 	public class CsvTailerTests
 	{

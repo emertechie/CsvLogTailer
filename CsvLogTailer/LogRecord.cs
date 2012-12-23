@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CsvLogTailer
+namespace CsvLogTailing
 {
 	public class LogRecord
 	{

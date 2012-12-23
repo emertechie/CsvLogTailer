@@ -8,7 +8,7 @@
     <ProjectGuid>{911D324C-8AD8-43DE-BC32-A8E936AE8031}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CsvLogTailer</RootNamespace>
+    <RootNamespace>CsvLogTailing</RootNamespace>
     <AssemblyName>CsvLogTailer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>

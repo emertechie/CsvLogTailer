@@ -1,7 +1,7 @@
 ﻿using System;
-using CsvLogTailer.Bookmarks;
+using CsvLogTailing.Bookmarks;
 
-namespace CsvLogTailer
+namespace CsvLogTailing
 {
 	public static class CsvLogTailerExtensions
 	{
