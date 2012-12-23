@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.IO;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
@@ -288,7 +289,11 @@ namespace CsvLogTailing.Tests
 			[Fact]
 			public void CanStoreLastPositionMetadataForEachLog()
 			{
-				var settings = new CsvLogTailerSettings { FileOrDirectoryPath = LogFilePath };
+				var settings = new CsvLogTailerSettings
+				{
+					FileOrDirectoryPath = LogFilePath,
+					BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(0.01)
+				};
 				var positionRepository = new FakeLogFileBookmarkRepository();
 
 				TailerSubscription = sut.Tail(settings, positionRepository).MaintainObservedEventsCollection(ObservedEvents);
@@ -298,14 +303,55 @@ namespace CsvLogTailing.Tests
 
 				Write(logLine1);
 				LogRecord first = GetNext(ObservedEvents);
-				LogFileBookmark metadataAfterFirstLog = positionRepository.Metadata.Single().Value;
+				LogFileBookmark metadataAfterFirstLog;
+				Assert.True(positionRepository.BookmarksSeenCollection.TryTake(out metadataAfterFirstLog, TimeoutTimeSpan));
 				
 				Write(logLine2);
 				LogRecord second = GetNext(ObservedEvents);
-				LogFileBookmark metadataAfterSecondLog = positionRepository.Metadata.Single().Value;
+				LogFileBookmark metadataAfterSecondLog;
+				Assert.True(positionRepository.BookmarksSeenCollection.TryTake(out metadataAfterSecondLog, TimeoutTimeSpan));
 
 				Assert.Equal(DateTime.Parse(first.LogFields[0]), metadataAfterFirstLog.LogDateTime);
 				Assert.Equal(DateTime.Parse(second.LogFields[0]), metadataAfterSecondLog.LogDateTime);
+			}
+
+			[Fact]
+			public void LastPositionMetadataIsOnlyUpdatedIfObserverSuccessfullyHandlesLogRecord()
+			{
+				var settings = new CsvLogTailerSettings { FileOrDirectoryPath = LogFilePath, BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(0.1) };
+				var positionRepository = new FakeLogFileBookmarkRepository();
+
+				Exception observedError = null;
+				LogRecord firstObservedLog = null;
+
+				var dummyException = new Exception("It's an exception dummy");
+
+				TailerSubscription = sut.Tail(settings, positionRepository)
+					.Subscribe(
+						logRecord =>
+						{
+							if (firstObservedLog == null)
+								firstObservedLog = logRecord;
+							else
+								throw dummyException;
+						},
+						error => observedError = error);
+
+				string logLine1 = CreateLogLine(logMessage: "message 1", dateTimeString: "2012-06-01 18:01:00");
+				string logLine2 = CreateLogLine(logMessage: "message 2", dateTimeString: "2012-06-01 18:02:00");
+
+				Write(logLine1);
+				LogFileBookmark metadataAfterFirstLog;
+				Assert.True(positionRepository.BookmarksSeenCollection.TryTake(out metadataAfterFirstLog, TimeoutTimeSpan));
+				Assert.Equal(firstObservedLog.LogDateTime, metadataAfterFirstLog.LogDateTime);
+
+				Write(logLine2);
+
+				// Note: Asserting we don't get any update after the exception:
+				LogFileBookmark metadataAfterSecondLog;
+				Assert.False(positionRepository.BookmarksSeenCollection.TryTake(out metadataAfterSecondLog, TimeoutTimeSpan));
+
+				Assert.NotEqual(dummyException, observedError);
 			}
 
 			[Fact]
@@ -371,6 +417,7 @@ namespace CsvLogTailing.Tests
 				public readonly Dictionary<string, LogFileBookmark> Metadata = new Dictionary<string, LogFileBookmark>();
 
 				private readonly Subject<LogFileBookmark> bookmarksSubject = new Subject<LogFileBookmark>();
+				private readonly BlockingCollection<LogFileBookmark> bookmarksSeenCollection = new BlockingCollection<LogFileBookmark>();
 
 				public LogFileBookmark Get(string filePath)
 				{
@@ -382,6 +429,11 @@ namespace CsvLogTailing.Tests
 					get { return bookmarksSubject; }
 				}
 
+				public BlockingCollection<LogFileBookmark> BookmarksSeenCollection
+				{
+					get { return bookmarksSeenCollection; }
+				}
+
 				public void AddOrUpdate(LogFileBookmark bookmark)
 				{
 					if (Metadata.ContainsKey(bookmark.FilePath))
@@ -389,6 +441,7 @@ namespace CsvLogTailing.Tests
 					else
 						Metadata.Add(bookmark.FilePath, bookmark);
 
+					bookmarksSeenCollection.Add(bookmark);
 					bookmarksSubject.OnNext(bookmark);
 				}
 			}
