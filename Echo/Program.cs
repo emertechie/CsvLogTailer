@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CsvLogTailing;
 using Mono.Options;
 
@@ -17,6 +18,7 @@ namespace Echo
 		{
 			string logFileOrDirPath = null;
 			string directoryFilter = null;
+			string excludeRegexString = null;
 			string[] columns = null;
 			bool echoToFile = false;
 
@@ -24,6 +26,7 @@ namespace Echo
 			{
 				{ "p|path=", p => logFileOrDirPath = p },
 				{ "f|filter=", f => directoryFilter = f },
+				{ "x|excludeRegex=", x => excludeRegexString = x },
 				{ "c|columns=", c => columns = c.Split(',').Select(x => x.Trim()).ToArray() },
 				{ "ef|echotofile", p => echoToFile = true }
 			};
@@ -46,6 +49,7 @@ namespace Echo
 					{
 						FileOrDirectoryPath = logFileOrDirPath,
 						DirectoryFilter = directoryFilter,
+						FileNameExcludeRegex = String.IsNullOrWhiteSpace(excludeRegexString) ? null : new Regex(excludeRegexString, RegexOptions.IgnoreCase | RegexOptions.Compiled),
 						ColumnNamesProvider = file => columns
 					})
 				.Subscribe(log =>

@@ -131,6 +131,9 @@ namespace CsvLogTailing
 				var directoryChangesSubscription = GetDirectoryChanges(settings.FileOrDirectoryPath, settings.DirectoryFilter)
 					.Subscribe(change =>
 					{
+						if (settings.FileNameExcludeRegex != null && settings.FileNameExcludeRegex.IsMatch(Path.GetFileName(change.Path)))
+							return;
+
 						if (change.ChangeType == FileTailingChangeType.StartTailing)
 						{
 							string[] columnsForFile = GetColumnsForFile(change.Path, settings);
