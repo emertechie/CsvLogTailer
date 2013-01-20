@@ -40,7 +40,7 @@ namespace CsvLogTailing
 			bool isADirectory = Directory.Exists(settings.FileOrDirectoryPath);
 
 			IObservable<LogRecord> logRecordsObs = isADirectory
-				? GetAllFileChangesForDirectory(settings, logFileBookmarkRepository)
+				? GetAllFileChangesForDirectory(settings, logFileBookmarkRepository).Merge()
 				: GetFileChanges(
 					settings.FileOrDirectoryPath,
 					settings.Encoding,
@@ -122,9 +122,9 @@ namespace CsvLogTailing
 			return settings.ColumnNamesProvider != null ? settings.ColumnNamesProvider(filePath) : null;
 		}
 
-		private IObservable<LogRecord> GetAllFileChangesForDirectory(CsvLogTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)
+		private IObservable<IObservable<LogRecord>> GetAllFileChangesForDirectory(CsvLogTailerSettings settings, ILogFileBookmarkRepository logFileBookmarkRepository)
 		{
-			return Observable.Create<LogRecord>(observer =>
+			return Observable.Create<IObservable<LogRecord>>(observer =>
 			{
 				var fileTailerSubscriptions = new Dictionary<string, IDisposable>();
 
@@ -145,7 +145,15 @@ namespace CsvLogTailing
 								settings.DateTimeColumnIndex,
 								logFileBookmarkRepository);
 
-							fileTailerSubscriptions.Add(change.Path, fileChanges.Subscribe(observer));
+							// Putting a thin wrapper around the 'fileChanges' observable so we can immediately dispose the subscription for individual files
+							// and free up resources associated with it. Otherwise, they may not get freed until program shutdown.
+							IObservable<LogRecord> wrappedFileChanges = Observable.Create<LogRecord>(fileChangesObserver =>
+								{
+									IDisposable subscription = fileChanges.Subscribe(fileChangesObserver);
+									fileTailerSubscriptions.Add(change.Path, subscription);
+									return () => { };
+								});
+							observer.OnNext(wrappedFileChanges);
 						}
 						else
 						{
@@ -212,7 +220,7 @@ namespace CsvLogTailing
 			});
 		}
 
-		private IObservable<FileTailingChange> GetFileSystemWatcherChanges(FileSystemWatcher watcher)
+		private static IObservable<FileTailingChange> GetFileSystemWatcherChanges(FileSystemWatcher watcher)
 		{
 			var created = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 				handler => watcher.Created += handler,
