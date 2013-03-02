@@ -4,7 +4,7 @@ Properties {
 	$buildArtifactsDir = "$buildDir\_build"
 	$projectOutputDir = "$buildArtifactsDir\bin\"
 	$solutionDir = "$buildDir"
-	$version = "0.6.4"
+	$version = "0.6.5"
 }
 
 Task default -Depends Compile, RunTests, CreatePackage
@@ -15,6 +15,7 @@ Task Compile -Depends Clean {
 	gci "$projectOutputDir\CsvParser*.*" | rm
 	gci "$projectOutputDir\System.Reactive*.*" | rm
 	gci "$projectOutputDir\FParsec*.*" | rm
+	gci "$projectOutputDir\FSharp.Core.*" | rm
 }
 
 Task Clean {
