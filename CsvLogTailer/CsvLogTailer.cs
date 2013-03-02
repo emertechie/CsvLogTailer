@@ -17,14 +17,22 @@ namespace CsvLogTailing
 {
 	public class CsvLogTailer
 	{
-		private readonly TimeSpan LogDirectoryPollTimeSpan = TimeSpan.FromSeconds(30);
-		private readonly TimeSpan FilePollTimeSpan = TimeSpan.FromSeconds(0.5);
+		private readonly TimeSpan logDirectoryPollTimeSpan = TimeSpan.FromSeconds(30);
+		private readonly TimeSpan filePollTimeSpan = TimeSpan.FromSeconds(0.5);
 
-		protected readonly Subject<Exception> ExceptionsSubject = new Subject<Exception>();
+		private readonly Subject<Exception> exceptionsSubject;
+		protected readonly ISubject<Exception, Exception> SyncedExceptionsSubject;
+
+		public CsvLogTailer()
+		{
+			exceptionsSubject = new Subject<Exception>();
+			// Exceptions can be raised concurrently on different threads, so protect access to subject to ensure sequential notifications:
+			SyncedExceptionsSubject = Subject.Synchronize(exceptionsSubject);
+		}
 
 		public IObservable<Exception> Exceptions
 		{
-			get { return ExceptionsSubject; }
+			get { return exceptionsSubject; }
 		}
 
 		public IObservable<LogRecord> Tail(CsvLogTailerSettings settings)
@@ -40,7 +48,8 @@ namespace CsvLogTailing
 			bool isADirectory = Directory.Exists(settings.FileOrDirectoryPath);
 
 			IObservable<LogRecord> logRecordsObs = isADirectory
-				? GetAllFileChangesForDirectory(settings, logFileBookmarkRepository).Merge()
+				? GetAllFileChangesForDirectory(settings, logFileBookmarkRepository)
+					.Merge()
 				: GetFileChanges(
 					settings.FileOrDirectoryPath,
 					settings.Encoding,
@@ -204,7 +213,7 @@ namespace CsvLogTailing
 									observer.OnNext(new FileTailingChange(file, FileTailingChangeType.StartTailing));
 							}
 
-							cts.Token.WaitHandle.WaitOne(LogDirectoryPollTimeSpan);
+							cts.Token.WaitHandle.WaitOne(logDirectoryPollTimeSpan);
 						}
 						while (!cts.IsCancellationRequested);
 					},
@@ -298,7 +307,7 @@ namespace CsvLogTailing
 					if (cancellationTokenSource.IsCancellationRequested)
 						break;
 
-					Thread.Sleep(FilePollTimeSpan);
+					Thread.Sleep(filePollTimeSpan);
 				}
 				while (!cancellationTokenSource.IsCancellationRequested);
 			}
@@ -344,7 +353,7 @@ namespace CsvLogTailing
 						if (lastException == null)
 						{
 							lastException = exception;
-							ExceptionsSubject.OnNext(lastException);
+							SyncedExceptionsSubject.OnNext(lastException);
 						}
 
 						// Reset everything and...
