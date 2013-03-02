@@ -40,14 +40,17 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CsvParser">
-      <HintPath>..\packages\CsvParser.0.5.0\lib\CsvParser.dll</HintPath>
+    <Reference Include="CsvParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\CsvParser.0.5.1\lib\net40\CsvParser.dll</HintPath>
     </Reference>
-    <Reference Include="FParsec">
-      <HintPath>..\packages\CsvParser.0.5.0\lib\FParsec.dll</HintPath>
+    <Reference Include="FParsec, Version=0.9.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\CsvParser.0.5.1\lib\net40\FParsec.dll</HintPath>
     </Reference>
-    <Reference Include="FParsecCS">
-      <HintPath>..\packages\CsvParser.0.5.0\lib\FParsecCS.dll</HintPath>
+    <Reference Include="FParsecCS, Version=0.9.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\CsvParser.0.5.1\lib\net40\FParsecCS.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
