@@ -4,7 +4,7 @@ Properties {
 	$buildArtifactsDir = "$buildDir\_build"
 	$projectOutputDir = "$buildArtifactsDir\bin\"
 	$solutionDir = "$buildDir"
-	$version = "0.6.5"
+	$version = "0.6.6"
 }
 
 Task default -Depends Compile, RunTests, CreatePackage
