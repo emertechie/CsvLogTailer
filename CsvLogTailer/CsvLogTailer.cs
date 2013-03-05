@@ -24,8 +24,14 @@ namespace CsvLogTailing
 		private readonly Subject<Exception> exceptionsSubject;
 		protected readonly ISubject<Exception, Exception> SyncedExceptionsSubject;
 
-		public CsvLogTailer()
+		private readonly object parsingLock = new object();
+		private int logsReadSinceLastGarbageCollect = 0;
+		private int? forceMemoryCollectionThreshold;
+		
+		public CsvLogTailer(int? forceMemoryCollectionThreshold = null)
 		{
+			this.forceMemoryCollectionThreshold = forceMemoryCollectionThreshold;
+
 			exceptionsSubject = new Subject<Exception>();
 			// Exceptions can be raised concurrently on different threads, so protect access to subject to ensure sequential notifications:
 			SyncedExceptionsSubject = Subject.Synchronize(exceptionsSubject);
@@ -352,14 +358,14 @@ namespace CsvLogTailing
 				{
 					while (!cancellationTokenSource.IsCancellationRequested && fileStream.Length != lastStreamPos)
 					{
-						foreach (LogRecord next in ReadNext(filePath, fileStream, encoding, possiblyNullColumnNames, dateTimeColumnIndex))
-						{
-							// Note: Deliberate use of '>=' condition below because date time format used in log file may not have enough
-							// resolution for high frequency logs. Seeking to last position should give you exact starting point anyway.
-							// Filtering by date is just an additional failsafe to prevent outputting tons of old logs again
-							if (next.LogDateTime >= minLogDateTimeFilter)
-								observer.OnNext(next);
-						}
+						ReadNext(filePath, fileStream, encoding, possiblyNullColumnNames, dateTimeColumnIndex, next =>
+							{
+								// Note: Deliberate use of '>=' condition below because date time format used in log file may not have enough
+								// resolution for high frequency logs. Seeking to last position should give you exact starting point anyway.
+								// Filtering by date is just an additional failsafe to prevent outputting tons of old logs again
+								if (next.LogDateTime >= minLogDateTimeFilter)
+									observer.OnNext(next);
+							});
 
 						if (fileStream.Position == lastStreamPos)
 							break;
@@ -376,7 +382,7 @@ namespace CsvLogTailing
 			}
 		}
 
-		private IEnumerable<LogRecord> ReadNext(string filePath, Stream stream, Encoding encoding, string[] possiblyNullColumnNames, int dateTimeColumnIndex)
+		private void ReadNext(string filePath, Stream stream, Encoding encoding, string[] possiblyNullColumnNames, int dateTimeColumnIndex, Action<LogRecord> action)
 		{
 			/*
 			 * TODO:
@@ -405,15 +411,33 @@ namespace CsvLogTailing
 					try
 					{
 						var parser = new CsvParser.CsvParser('|');
-						IEnumerable<string[]> results = parser.ParseCharStream(charStream);
+						
+						// Big-ass lock. Necessary to prevent temporary memory explosion on startup if there are lots of existing logs to be read.
+						// Clearly there must be a better way, but has to do for now. Also protects access to logsReadSinceLastGarbageCollect and hence calls to GC.Collect
+						lock (parsingLock)
+						{
+							var nextRecords = parser.ParseCharStream(charStream)
+								.Where(fields => fields.Any() && !String.IsNullOrWhiteSpace(fields[0])) // <<< TODO: Can remove this when parser fixed
+								.Where(fields => !String.IsNullOrWhiteSpace(fields[dateTimeColumnIndex]))
+								.Select(fields => new LogRecord(filePath, DateTime.Parse(fields[dateTimeColumnIndex]), fields, possiblyNullColumnNames));
 
-						return results
-							.Where(fields => fields.Any() && !String.IsNullOrWhiteSpace(fields[0])) // <<< TODO: Can remove this when parser fixed
-							.Where(fields => !String.IsNullOrWhiteSpace(fields[dateTimeColumnIndex]))
-							.Select(fields =>
+							foreach (var nextRecord in nextRecords)
 							{
-								return new LogRecord(filePath, DateTime.Parse(fields[dateTimeColumnIndex]), fields, possiblyNullColumnNames);
-							});
+								action(nextRecord);
+								++logsReadSinceLastGarbageCollect;
+							}
+
+							nextRecords = null;
+
+							if (forceMemoryCollectionThreshold.HasValue && logsReadSinceLastGarbageCollect >= forceMemoryCollectionThreshold.Value)
+							{
+								Console.WriteLine("COLLECTING MEMORY after " + logsReadSinceLastGarbageCollect + " logs");
+								GC.Collect();
+								logsReadSinceLastGarbageCollect = 0;
+							}
+						}
+
+						break;
 					}
 					catch (Exception exception)
 					{
@@ -438,7 +462,7 @@ namespace CsvLogTailing
 							// string whereAmI = charStream.PeekString(50);
 
 							if (charStream.IsEndOfStream)
-								return new LogRecord[0];
+								return;
 						}
 						catch (Exception)
 						{

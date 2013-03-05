@@ -28,5 +28,10 @@ namespace CsvLogTailing
 		public TimeSpan BookmarkRepositoryUpdateFrequency { get; set; }
 
 		public Encoding Encoding { get; set; }
+
+		/// <summary>
+		/// Gets or sets the count of logs after which a GC.Collect will be forced.
+		/// </summary>
+		public int? ForceMemoryCollectionThreshold { get; set; }
 	}
 }
