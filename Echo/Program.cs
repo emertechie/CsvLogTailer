@@ -36,7 +36,7 @@ namespace Echo
 
 			Console.WriteLine("Press return to finish");
 
-			var tailer = new CsvLogTailer();
+			var tailer = new CsvLogTailer(forceMemoryCollectionThreshold: 1000);
 
 			var exceptions = new List<Exception>();
 			var exSub = tailer.Exceptions.Subscribe(ex =>
@@ -45,6 +45,7 @@ namespace Echo
 					exceptions.Add(ex);
 				});
 
+			int i = 0;
 			tailer
 				.Tail(new CsvLogTailerSettings
 					{
@@ -67,8 +68,8 @@ namespace Echo
 							File.AppendAllText(echoFilePath, logLine + Environment.NewLine);
 						}
 
-						// Thread.Sleep(200);
-						Console.WriteLine("[{0} {1}]: {2}", log.LogDateTime, fileName, logLine);
+						//if (i++ % 100 == 0)
+						//	Console.WriteLine("[{0} {1}]: {2}", log.LogDateTime, fileName, logLine);
 					},
 					error => Console.WriteLine("ERROR (SUBSCRIPTION STOPPED): " + error.ToString()));
 
