@@ -74,14 +74,12 @@ namespace CsvLogTailing
 					.GroupBy(x => x.FilePath)
 					.Subscribe(group =>
 						{
-							// Console.WriteLine("New group for " + group.Key);
 							group
 								.SampleResponsive(settings.BookmarkRepositoryUpdateFrequency)
 								.Subscribe(logRec =>
 									{
 										try
 										{
-											// Console.WriteLine("Updating bookmark for " + group.Key);
 											logFileBookmarkRepository.AddOrUpdate(new LogFileBookmark(logRec.FilePath, logRec.LogDateTime));
 										}
 										catch (Exception bookmarkException)
@@ -288,11 +286,7 @@ namespace CsvLogTailing
 			var created = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 				handler => watcher.Created += handler,
 				handler => watcher.Created -= handler)
-				.Select(x =>
-					{
-						// Console.WriteLine("CREATED: " + x.EventArgs.FullPath);
-						return new[] {new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)};
-					});
+				.Select(x => new[] {new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)});
 
 			// TODO: We won't get delete events for log files we have open. Noticed that if you delete file in Win Explorer and then refreshed the 
 			// directory, the file reappeared. See: http://superuser.com/questions/105786/windows-7-files-reappear-after-deletion
@@ -300,23 +294,15 @@ namespace CsvLogTailing
 			var deleted = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 				handler => watcher.Deleted += handler,
 				handler => watcher.Deleted -= handler)
-				.Select(x =>
-					{
-						// Console.WriteLine("DELETED: " + x.EventArgs.FullPath);
-						return new[] {new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StopTailing)};
-					});
+				.Select(x => new[] {new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StopTailing)});
 
 			var renamed = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
 				handler => watcher.Renamed += handler,
 				handler => watcher.Renamed -= handler)
-				.Select(x =>
+				.Select(x => new[]
 					{
-						// Console.WriteLine("CHANGED: Old=" + x.EventArgs.OldFullPath + ", New=" + x.EventArgs.FullPath);
-						return new[]
-							{
-								new FileTailingChange(x.EventArgs.OldFullPath, FileTailingChangeType.StopTailing),
-								new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)
-							};
+						new FileTailingChange(x.EventArgs.OldFullPath, FileTailingChangeType.StopTailing),
+						new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)
 					});
 
 			return Observable.Merge(created, deleted, renamed).SelectMany(x => x);
@@ -427,11 +413,8 @@ namespace CsvLogTailing
 								++logsReadSinceLastGarbageCollect;
 							}
 
-							nextRecords = null;
-
 							if (forceMemoryCollectionThreshold.HasValue && logsReadSinceLastGarbageCollect >= forceMemoryCollectionThreshold.Value)
 							{
-								Console.WriteLine("COLLECTING MEMORY after " + logsReadSinceLastGarbageCollect + " logs");
 								GC.Collect();
 								logsReadSinceLastGarbageCollect = 0;
 							}

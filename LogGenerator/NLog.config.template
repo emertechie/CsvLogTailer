@@ -1,0 +1,16 @@
+﻿<nlog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <extensions>
+    <add assembly="CloudBird.Logging"/>
+  </extensions>
+
+  <variable name="projectName" value="THE-PROJECT-NAME-HERE"/>
+  <variable name="environmentName" value="${appSetting:OctopusEnvironmentName}" />
+
+  <include file="NLog.Targets.config" />
+
+  <rules>
+    <logger name="*" minlevel="Info" writeTo="LogFile" />
+    <logger name="*" minlevel="Warn" writeTo="AlertsLogFile" />
+    <logger name="*" minlevel="Info" writeTo="Console" />
+  </rules>
+</nlog>
