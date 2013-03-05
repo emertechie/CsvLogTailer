@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -64,8 +65,25 @@ namespace CsvLogTailing
 				var subscription1 = sharedObservable.Subscribe(observer);
 
 				var subscription2 = sharedObservable
-					.SampleResponsive(settings.BookmarkRepositoryUpdateFrequency)
-					.Subscribe(logRec => logFileBookmarkRepository.AddOrUpdate(new LogFileBookmark(logRec.FilePath, logRec.LogDateTime)));
+					.GroupBy(x => x.FilePath)
+					.Subscribe(group =>
+						{
+							// Console.WriteLine("New group for " + group.Key);
+							group
+								.SampleResponsive(settings.BookmarkRepositoryUpdateFrequency)
+								.Subscribe(logRec =>
+									{
+										try
+										{
+											// Console.WriteLine("Updating bookmark for " + group.Key);
+											logFileBookmarkRepository.AddOrUpdate(new LogFileBookmark(logRec.FilePath, logRec.LogDateTime));
+										}
+										catch (Exception bookmarkException)
+										{
+											SyncedExceptionsSubject.OnNext(bookmarkException);
+										}
+									});
+						});
 
 				return new CompositeDisposable(sharedObservable.Connect(), subscription1, subscription2);
 			});
@@ -185,48 +203,67 @@ namespace CsvLogTailing
 		private IObservable<FileTailingChange> GetDirectoryChanges(string directoryPath, string directoryFilter)
 		{
 			string filter = directoryFilter ?? "*.*";
-			var watcher = new FileSystemWatcher(directoryPath, filter);
+			var watcher = new FileSystemWatcher(directoryPath, filter)
+				{
+					// For some reason you need to specify this filter for delete notifications to work...
+					NotifyFilter = NotifyFilters.FileName
+				};
+			watcher.Error += (sender, args) =>
+				{
+					var exception = args.GetException();
+					SyncedExceptionsSubject.OnNext(new Exception("Error from FileSystemWatcher: " + exception.Message, exception));
+				};
+
 			var trackedPaths = new ConcurrentDictionary<string, bool>();
 
 			return Observable.Create<FileTailingChange>(observer =>
-			{
-				IObservable<FileTailingChange> fileSystemWatcherChanges = GetFileSystemWatcherChanges(watcher)
-					.Do(x =>
-					{
-						bool ignored;
-						if (x.ChangeType == FileTailingChangeType.StartTailing)
-							trackedPaths.TryAdd(x.Path, true);
-						else
-							trackedPaths.TryRemove(x.Path, out ignored);
-					});
-				watcher.EnableRaisingEvents = true;
+				{
+					var fswLock = new object();
 
-				// I don't really trust the FileSystemWatcher, so using a task to repeatedly check if we've got all the files
-				var cts = new CancellationTokenSource();
-				Task.Factory.StartNew(() =>
-					{
-						do
-						{
-							foreach (string file in Directory.EnumerateFiles(directoryPath, filter))
+					var syncedObserver = Observer.Synchronize(observer);
+					IObservable<FileTailingChange> fileSystemWatcherChanges = GetFileSystemWatcherChanges(watcher)
+						.Where(x =>
 							{
-								if (trackedPaths.TryAdd(file, true))
-									observer.OnNext(new FileTailingChange(file, FileTailingChangeType.StartTailing));
+								lock (fswLock)
+								{
+									bool ignored;
+									return x.ChangeType == FileTailingChangeType.StartTailing
+										       ? trackedPaths.TryAdd(x.Path, true)
+										       : trackedPaths.TryRemove(x.Path, out ignored);
+								}
+							});
+
+					watcher.EnableRaisingEvents = true;
+
+					var cts = new CancellationTokenSource();
+					Task.Factory.StartNew(() =>
+						{
+							do
+							{
+								var files = Directory.EnumerateFiles(directoryPath, filter);
+
+								lock (fswLock)
+								{
+									foreach (string file in files)
+									{
+										if (trackedPaths.TryAdd(file, true))
+											syncedObserver.OnNext(new FileTailingChange(file, FileTailingChangeType.StartTailing));
+									}
+								}
+								cts.Token.WaitHandle.WaitOne(logDirectoryPollTimeSpan);
 							}
+							while (!cts.IsCancellationRequested);
+						},
+						cts.Token)
+						.ContinueWith(
+							t => observer.OnError(t.Exception),
+							TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
 
-							cts.Token.WaitHandle.WaitOne(logDirectoryPollTimeSpan);
-						}
-						while (!cts.IsCancellationRequested);
-					},
-					cts.Token)
-					.ContinueWith(
-						t => observer.OnError(t.Exception),
-						TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
-
-				var stopFswDisposable = Disposable.Create(() => watcher.EnableRaisingEvents = false);
-				var fileWatcherSubscription = fileSystemWatcherChanges.Subscribe(observer);
-				var stopTaskDisposable = Disposable.Create(cts.Cancel);
-				return new CompositeDisposable(stopFswDisposable, fileWatcherSubscription, stopTaskDisposable);
-			});
+					var stopFswDisposable = Disposable.Create(() => watcher.EnableRaisingEvents = false);
+					var fileWatcherSubscription = fileSystemWatcherChanges.Subscribe(syncedObserver);
+					var stopTaskDisposable = Disposable.Create(cts.Cancel);
+					return new CompositeDisposable(stopFswDisposable, fileWatcherSubscription, stopTaskDisposable);
+				});
 		}
 
 		private static IObservable<FileTailingChange> GetFileSystemWatcherChanges(FileSystemWatcher watcher)
@@ -234,21 +271,36 @@ namespace CsvLogTailing
 			var created = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 				handler => watcher.Created += handler,
 				handler => watcher.Created -= handler)
-				.Select(x => new[] { new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing) });
+				.Select(x =>
+					{
+						// Console.WriteLine("CREATED: " + x.EventArgs.FullPath);
+						return new[] {new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)};
+					});
 
+			// TODO: We won't get delete events for log files we have open. Noticed that if you delete file in Win Explorer and then refreshed the 
+			// directory, the file reappeared. See: http://superuser.com/questions/105786/windows-7-files-reappear-after-deletion
+			// Will probably need to periodically close file streams and try to reopen (hopefully file is free to be deleted then)
 			var deleted = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 				handler => watcher.Deleted += handler,
 				handler => watcher.Deleted -= handler)
-				.Select(x => new[] { new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StopTailing) });
+				.Select(x =>
+					{
+						// Console.WriteLine("DELETED: " + x.EventArgs.FullPath);
+						return new[] {new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StopTailing)};
+					});
 
 			var renamed = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
 				handler => watcher.Renamed += handler,
 				handler => watcher.Renamed -= handler)
-				.Select(x => new[]
-				{
-					new FileTailingChange(x.EventArgs.OldFullPath, FileTailingChangeType.StopTailing),
-					new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)
-				});
+				.Select(x =>
+					{
+						// Console.WriteLine("CHANGED: Old=" + x.EventArgs.OldFullPath + ", New=" + x.EventArgs.FullPath);
+						return new[]
+							{
+								new FileTailingChange(x.EventArgs.OldFullPath, FileTailingChangeType.StopTailing),
+								new FileTailingChange(x.EventArgs.FullPath, FileTailingChangeType.StartTailing)
+							};
+					});
 
 			return Observable.Merge(created, deleted, renamed).SelectMany(x => x);
 		}
@@ -322,6 +374,10 @@ namespace CsvLogTailing
 			 * - Maybe record stream end position on entering method and ensure we never read past that somehow?
 			 * 
 			 */
+
+			// Reset stream position if file is truncated (or larger file is overwritten with smaller file)
+			if (stream.Position > stream.Length)
+				stream.Position = 0;
 
 			var originalStreamPosition = stream.Position;
 			Exception lastException = null;
