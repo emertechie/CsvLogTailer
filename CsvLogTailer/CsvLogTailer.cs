@@ -106,6 +106,8 @@ namespace CsvLogTailing
 				var disposable = new CompositeDisposable();
 				var cancellationTokenSource = new CancellationTokenSource();
 
+				int sharingExceptions = 0;
+
 				Task fileWatcherTask = Task.Factory.StartNew(() =>
 					{
 						do
@@ -113,10 +115,19 @@ namespace CsvLogTailing
 							try
 							{
 								TailFile(filePath, encoding, possiblyNullColumnNames, dateTimeColumnIndex, observer, cancellationTokenSource, lastKnownPosition);
+
+								sharingExceptions = 0;
 							}
 							catch (FileNotFoundException)
 							{
 								WaitUntilFileCreated(filePath, cancellationTokenSource);
+							}
+							catch (IOException ioex)
+							{
+								if (ioex.Message.Contains("because it is being used by another process") && ++sharingExceptions < 10)
+									Thread.Sleep(250);
+								else
+									throw;
 							}
 							catch (Exception ex)
 							{
