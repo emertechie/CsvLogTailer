@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using CsvLogTailing;
 using Mono.Options;
 
@@ -50,22 +51,26 @@ namespace Echo
 						FileOrDirectoryPath = logFileOrDirPath,
 						DirectoryFilter = directoryFilter,
 						FileNameExcludeRegex = String.IsNullOrWhiteSpace(excludeRegexString) ? null : new Regex(excludeRegexString, RegexOptions.IgnoreCase | RegexOptions.Compiled),
-						ColumnNamesProvider = file => columns
+						ColumnNamesProvider = file => columns,
+						BookmarkRepositoryUpdateFrequency = TimeSpan.FromSeconds(2)
 					})
-				.Subscribe(log =>
-				{
-					var fileName = Path.GetFileName(log.FilePath);
-					string logLine = String.Join("|", log.LogFields);
-
-					if (echoToFile)
+				.Subscribe(
+					log =>
 					{
-						var dir = Path.GetDirectoryName(log.FilePath);
-						var echoFilePath = Path.Combine(dir, fileName + ".echo");
-						File.AppendAllText(echoFilePath, logLine + Environment.NewLine);
-					}
+						var fileName = Path.GetFileName(log.FilePath);
+						string logLine = String.Join("|", log.LogFields);
 
-					Console.WriteLine("[{0} {1}]: {2}", log.LogDateTime, fileName, logLine);
-				});
+						if (echoToFile)
+						{
+							var dir = Path.GetDirectoryName(log.FilePath);
+							var echoFilePath = Path.Combine(dir, fileName + ".echo");
+							File.AppendAllText(echoFilePath, logLine + Environment.NewLine);
+						}
+
+						// Thread.Sleep(200);
+						Console.WriteLine("[{0} {1}]: {2}", log.LogDateTime, fileName, logLine);
+					},
+					error => Console.WriteLine("ERROR (SUBSCRIPTION STOPPED): " + error.ToString()));
 
 			Console.ReadLine();
 
