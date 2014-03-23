@@ -6,7 +6,7 @@
 		<title>CsvLogTailer</title>
 		<authors>Andrew Smith</authors>
 		<owners>Andrew Smith</owners>
-		<projectUrl>https://bitbucket.org/emertechie/csvlogtailer</projectUrl>
+		<projectUrl>https://github.com/emertechie/CsvLogTailer</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Utility to tail a CSV log file, or a folder containing CSV log files. Exposes results as an IObservable&lt;LogRecord&gt;. Supports detecting new files, and only tailing from previous position.</description>
 		<copyright>Copyright 2012</copyright>
