@@ -40,7 +40,7 @@ tailer
 
 Given a directory C:\Logs with log files a.log and b.log, tailing the directory with the configuration below will create files a.log.last and b.log.last. Each '.last' file will contain the last date and time processed from the corresponding log files.
 
-**Note**: On restart, the tailer will only process logs where the log DateTime is greater than //or equal to// the last log time read from the '.last' file. The reason for this is that there could have been another log written just at the moment the tailer was stopping with the same DateTime as the last log processed. So, be prepared for the potential to have duplicate logs. But, it should be extremely rare and is better than missing logs anyway!
+**Note**: On restart, the tailer will only process logs where the log DateTime is greater than or equal to the last log time read from the '.last' file. The reason for this is that there could have been another log written just at the moment the tailer was stopping with the same DateTime as the last log processed. So, be prepared for the potential to have duplicate logs. But, it should be extremely rare and is better than missing logs anyway.
 
 ```C#
 
